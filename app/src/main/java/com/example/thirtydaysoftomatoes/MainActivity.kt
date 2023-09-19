@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -29,6 +31,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.thirtydaysoftomatoes.data.TomatoTip
+import com.example.thirtydaysoftomatoes.data.TomatoTipsRepository
 import com.example.thirtydaysoftomatoes.ui.theme.ThirtyDaysOfTomatoesTheme
 
 class MainActivity : ComponentActivity() {
@@ -80,7 +83,14 @@ fun TomatoTipCard(
             )
 
 
-            Image(painter = painterResource(id = tomatoTip.image), contentDescription = null)
+            Image(
+                painter = painterResource(id = tomatoTip.image),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = dimensionResource(id = R.dimen.padding_medium))
+                    .size(dimensionResource(id = R.dimen.image_size))
+                    .clip(MaterialTheme.shapes.extraLarge)
+            )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -142,10 +152,5 @@ fun ExpandButton(
 @Preview(showBackground = true)
 @Composable
 fun TomatoTipCardPreview() {
-    val tomatoTip = TomatoTip(
-        title = R.string.tip1_title,
-        image = R.drawable.ic_launcher_foreground,
-        description = R.string.tip1_description
-    )
-    TomatoTipCard(tomatoTip = tomatoTip, dayNumber = 1)
+    TomatoTipCard(tomatoTip = TomatoTipsRepository.tomatoTips[0], dayNumber = 1)
 }
