@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,7 +68,12 @@ fun TomatoTipCard(
     var expanded by remember {
         mutableStateOf(false)
     }
-    Card(modifier = modifier) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        modifier = modifier
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(
@@ -79,9 +85,11 @@ fun TomatoTipCard(
 
             Text(
                 text = stringResource(id = R.string.day) + " $dayNumber",
-                modifier = Modifier.weight(1f)
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .padding(start = dimensionResource(id = R.dimen.padding_medium))
+                    .weight(1f)
             )
-
 
             Image(
                 painter = painterResource(id = tomatoTip.image),
@@ -101,7 +109,10 @@ fun TomatoTipCard(
             Text(
                 text = stringResource(id = tomatoTip.title),
                 textAlign = TextAlign.End,
-                modifier = modifier.weight(1f)
+                style = MaterialTheme.typography.titleMedium,
+                modifier = modifier
+                    .padding(end = dimensionResource(id = R.dimen.padding_small))
+                    .weight(1f)
             )
             ExpandButton(
                 expanded = expanded,
@@ -116,6 +127,7 @@ fun TomatoTipCard(
             Text(
                 text = stringResource(id = tomatoTip.description),
                 textAlign = TextAlign.Justify,
+                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(
                     start = dimensionResource(id = R.dimen.padding_medium),
                     end = dimensionResource(id = R.dimen.padding_medium),
@@ -123,8 +135,6 @@ fun TomatoTipCard(
                 )
             )
         }
-
-
     }
 }
 
@@ -152,5 +162,8 @@ fun ExpandButton(
 @Preview(showBackground = true)
 @Composable
 fun TomatoTipCardPreview() {
-    TomatoTipCard(tomatoTip = TomatoTipsRepository.tomatoTips[0], dayNumber = 1)
+    ThirtyDaysOfTomatoesTheme() {
+        TomatoTipCard(tomatoTip = TomatoTipsRepository.tomatoTips[0], dayNumber = 1)
+    }
+
 }
