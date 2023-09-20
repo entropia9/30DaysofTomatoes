@@ -4,12 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -32,6 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.thirtydaysoftomatoes.data.TomatoTip
 import com.example.thirtydaysoftomatoes.data.TomatoTipsRepository
 import com.example.thirtydaysoftomatoes.ui.theme.ThirtyDaysOfTomatoesTheme
 
@@ -54,32 +62,51 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun TomatoTipList(modifier: Modifier = Modifier) {
-
+fun TomatoTipList(
+    list: List<TomatoTip>,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp)
+) {
+    LazyColumn(contentPadding = contentPadding) {
+        ->
+        items(list) {
+            TomatoTipCard(
+                tomatoTip = it,
+                modifier.padding(
+                    top = dimensionResource(id = R.dimen.padding_small),
+                    start = dimensionResource(id = R.dimen.padding_medium),
+                    end = dimensionResource(id = R.dimen.padding_medium)
+                )
+            )
+        }
+    }
 }
 
 
 @Composable
 fun TomatoTipCard(
-    //tomatoTip: TomatoTip,
-    dayNumber: Int,
+    tomatoTip: TomatoTip,
     modifier: Modifier = Modifier
 ) {
-    val tomatoTip = TomatoTipsRepository.tomatoTips[dayNumber]
     var expanded by remember {
         mutableStateOf(false)
     }
-    val isEven = dayNumber % 2 == 0
+    val isEven = tomatoTip.dayNumber % 2 == 0
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         ),
-        modifier = modifier
+        modifier = modifier.animateContentSize(
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
     ) {
         if (isEven) {
-            EvenTitleRow(dayNumber = dayNumber, imageId = tomatoTip!!.image)
+            EvenTitleRow(dayNumber = tomatoTip.dayNumber, imageId = tomatoTip.image)
         } else {
-            OddTitleRow(dayNumber = dayNumber, imageId = tomatoTip!!.image)
+            OddTitleRow(dayNumber = tomatoTip.dayNumber, imageId = tomatoTip.image)
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -93,7 +120,10 @@ fun TomatoTipCard(
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = modifier
-                    .padding(end = dimensionResource(id = R.dimen.padding_small))
+                    .padding(
+                        end = dimensionResource(id = R.dimen.padding_small),
+                        bottom = dimensionResource(id = R.dimen.padding_small)
+                    )
                     .weight(1f)
             )
             ExpandButton(
@@ -101,7 +131,10 @@ fun TomatoTipCard(
                 onClick = { expanded = !expanded },
                 modifier
 
-                    .padding(end = dimensionResource(id = R.dimen.padding_medium))
+                    .padding(
+                        end = dimensionResource(id = R.dimen.padding_medium),
+                        bottom = dimensionResource(id = R.dimen.padding_small)
+                    )
             )
         }
 
@@ -143,7 +176,6 @@ fun OddTitleRow(dayNumber: Int, @DrawableRes imageId: Int) {
             painter = painterResource(id = imageId),
             contentDescription = null,
             modifier = Modifier
-                .padding(end = dimensionResource(id = R.dimen.padding_medium))
                 .size(dimensionResource(id = R.dimen.image_size))
                 .clip(MaterialTheme.shapes.extraLarge)
         )
@@ -165,7 +197,6 @@ fun EvenTitleRow(dayNumber: Int, @DrawableRes imageId: Int) {
             painter = painterResource(id = imageId),
             contentDescription = null,
             modifier = Modifier
-                .padding(start = dimensionResource(id = R.dimen.padding_medium))
                 .size(dimensionResource(id = R.dimen.image_size))
                 .clip(MaterialTheme.shapes.extraLarge)
         )
@@ -208,7 +239,7 @@ fun ExpandButton(
 @Composable
 fun TomatoTipCardPreview() {
     ThirtyDaysOfTomatoesTheme() {
-        TomatoTipCard(dayNumber = 2)
+        TomatoTipList(list = TomatoTipsRepository.tomatoTips)
     }
 
 }
