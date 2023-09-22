@@ -256,7 +256,7 @@ fun ExpandButton(
             imageVector = if (expanded) ImageVector.vectorResource(id = R.drawable.nutrition_24px) else ImageVector.vectorResource(
                 id = R.drawable.psychiatry_24px
             ),
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.expand_button),
             tint = if (expanded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
         )
 

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">30 Days of Tomatoes</string>
     <string name="scaffold_text">30 Days of Tomato Tips</string>
+    <string name="expand_button">Expand Button</string>
     <string name="day">Day</string>
     <string name="tip1_title">Pick the right place</string>
     <string name="tip1_description">Tomatoes like sun. For optimal development they need min. 8 hours a day.  Other than that you can plant them in the garden, in the greenhouse, on the balcony or in the tunnel. As long as it gets enough sun, sky is the limit :) </string>
