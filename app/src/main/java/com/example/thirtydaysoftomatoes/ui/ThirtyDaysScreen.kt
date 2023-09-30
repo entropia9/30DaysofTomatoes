@@ -4,18 +4,20 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -108,6 +110,7 @@ fun TomatoTipList(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TomatoTipFeed(
     modifier: Modifier = Modifier,
@@ -115,17 +118,17 @@ fun TomatoTipFeed(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalItemSpacing = dimensionResource(id = R.dimen.padding_small),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_large)),
         modifier = Modifier.padding(
             start = dimensionResource(id = R.dimen.padding_large),
             end = dimensionResource(id = R.dimen.padding_large)
         )
+            .fillMaxSize()
     ) {
-        ->
         items(uiState.listOfTips) {
             TomatoTipCard(
                 tomatoTip = it,
