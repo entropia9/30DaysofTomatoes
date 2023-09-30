@@ -5,12 +5,16 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,7 +25,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,21 +41,32 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.thirtydaysoftomatoes.R
 import com.example.thirtydaysoftomatoes.data.TomatoTip
-import com.example.thirtydaysoftomatoes.data.TomatoTipsRepository
 import com.example.thirtydaysoftomatoes.ui.theme.ThirtyDaysOfTomatoesTheme
+import com.example.thirtydaysoftomatoes.utils.ThirtyDaysContentType
+import com.example.thirtydaysoftomatoes.utils.shouldBeFlipped
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThirtyDaysApp() {
-    Scaffold(topBar = { TomatoTipsTopAppBar() }) { it ->
-        TomatoTipList(
-            list = TomatoTipsRepository.tomatoTips,
-            contentPadding = it
-        )
+fun ThirtyDaysApp(windowSize: WindowWidthSizeClass) {
+    val contentType = when (windowSize) {
+        WindowWidthSizeClass.Expanded -> ThirtyDaysContentType.Feed
+        else -> ThirtyDaysContentType.ListOnly
+    }
+    Scaffold(topBar = { TomatoTipsTopAppBar() }) {
+        if (contentType == ThirtyDaysContentType.Feed) {
+            TomatoTipFeed(
+                contentPadding = it
+            )
+        } else {
+            TomatoTipList(
+                contentPadding = it
+            )
+        }
     }
 }
 
@@ -70,19 +87,51 @@ fun TomatoTipsTopAppBar(modifier: Modifier = Modifier) {
 
 @Composable
 fun TomatoTipList(
-    list: List<TomatoTip>,
     modifier: Modifier = Modifier,
+    viewModel: ThirtyDaysViewModel = viewModel(),
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     LazyColumn(contentPadding = contentPadding) {
         ->
-        items(list) {
+        items(uiState.listOfTips) {
             TomatoTipCard(
                 tomatoTip = it,
-                modifier.padding(
+                isFlipped = it.dayNumber % 2 == 0,
+                modifier = modifier.padding(
                     top = dimensionResource(id = R.dimen.padding_small),
                     start = dimensionResource(id = R.dimen.padding_medium),
                     end = dimensionResource(id = R.dimen.padding_medium)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun TomatoTipFeed(
+    modifier: Modifier = Modifier,
+    viewModel: ThirtyDaysViewModel = viewModel(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_large)),
+        modifier = Modifier.padding(
+            start = dimensionResource(id = R.dimen.padding_large),
+            end = dimensionResource(id = R.dimen.padding_large)
+        )
+    ) {
+        ->
+        items(uiState.listOfTips) {
+            TomatoTipCard(
+                tomatoTip = it,
+                isFlipped = shouldBeFlipped(it.dayNumber, uiState.listOfTips.size),
+                modifier = modifier.padding(
+                    bottom = dimensionResource(id = R.dimen.padding_small),
                 )
             )
         }
@@ -93,12 +142,12 @@ fun TomatoTipList(
 @Composable
 fun TomatoTipCard(
     tomatoTip: TomatoTip,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isFlipped: Boolean = false
 ) {
     var expanded by remember {
         mutableStateOf(false)
     }
-    val isEven = tomatoTip.dayNumber % 2 == 0
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -110,10 +159,10 @@ fun TomatoTipCard(
             )
         )
     ) {
-        if (isEven) {
-            EvenTitleRow(dayNumber = tomatoTip.dayNumber, imageId = tomatoTip.image)
+        if (isFlipped) {
+            FlippedTitleRow(dayNumber = tomatoTip.dayNumber, imageId = tomatoTip.image)
         } else {
-            OddTitleRow(dayNumber = tomatoTip.dayNumber, imageId = tomatoTip.image)
+            TitleRow(dayNumber = tomatoTip.dayNumber, imageId = tomatoTip.image)
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -135,7 +184,9 @@ fun TomatoTipCard(
             )
             ExpandButton(
                 expanded = expanded,
-                onClick = { expanded = !expanded },
+                onClick = {
+                    expanded = !expanded
+                },
                 modifier
 
                     .padding(
@@ -161,7 +212,7 @@ fun TomatoTipCard(
 }
 
 @Composable
-fun OddTitleRow(dayNumber: Int, @DrawableRes imageId: Int) {
+fun TitleRow(dayNumber: Int, @DrawableRes imageId: Int) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(
@@ -190,7 +241,7 @@ fun OddTitleRow(dayNumber: Int, @DrawableRes imageId: Int) {
 }
 
 @Composable
-fun EvenTitleRow(dayNumber: Int, @DrawableRes imageId: Int) {
+fun FlippedTitleRow(dayNumber: Int, @DrawableRes imageId: Int) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(
@@ -242,11 +293,26 @@ fun ExpandButton(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    device = Devices.PHONE
+)
 @Composable
-fun TomatoTipCardPreview() {
+fun TomatoTipPreview() {
     ThirtyDaysOfTomatoesTheme {
-        ThirtyDaysApp()
+        ThirtyDaysApp(windowSize = WindowWidthSizeClass.Compact)
+    }
+
+}
+
+@Preview(
+    showBackground = true,
+    device = Devices.TABLET
+)
+@Composable
+fun TomatoTipExpandedPreview() {
+    ThirtyDaysOfTomatoesTheme {
+        ThirtyDaysApp(windowSize = WindowWidthSizeClass.Expanded)
     }
 
 }
